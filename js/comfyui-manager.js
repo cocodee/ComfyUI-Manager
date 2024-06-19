@@ -977,6 +977,28 @@ class ManagerMenuDialog extends ComfyDialog {
 			set_component_policy(event.target.value);
 		});
 
+		// reverse-proxy policy
+		let reverse_proxy_combo = document.createElement("select");
+		reverse_proxy_combo.setAttribute("title", "If you are in China, you can use this option to enable reverse-proxy to download custom nodes and models.");
+		reverse_proxy_combo.className = "cm-menu-combo";
+		reverse_proxy_combo.appendChild($el('option', { value: 'none', text: 'Reverse Proxy: None' }, []));
+		reverse_proxy_combo.appendChild($el('option', { value: 'ghproxy-mirror', text: 'Reverse Proxy: GHProxy Mirror to GitHub' }, []));
+		reverse_proxy_combo.appendChild($el('option', { value: 'hf-mirror', text: 'Reverse Proxy: HF-Mirror to HuggingFace' }, []));
+		reverse_proxy_combo.appendChild($el('option', { value: 'both', text: 'Reverse Proxy: Both' }, []));
+
+		api.fetchApi('/manager/reverse_proxy/policy')
+			.then(response => response.text())
+			.then(data => {
+				reverse_proxy_combo.value = data;
+				set_reverse_proxy_policy(data);
+			})
+
+		reverse_proxy_combo.addEventListener('change', function (event) {
+			api.fetchApi(`/manager/reverse_proxy/policy?value=${event.target.value}`);
+			set_reverse_proxy_policy(event.target.value);
+		})
+
+		// double-click policy
 		let dbl_click_policy_combo = document.createElement("select");
 		dbl_click_policy_combo.setAttribute("title", "Sets the behavior when you double-click the title area of a node.");
 		dbl_click_policy_combo.className = "cm-menu-combo";
@@ -1028,6 +1050,7 @@ class ManagerMenuDialog extends ComfyDialog {
 			default_ui_combo,
 			share_combo,
 			component_policy_combo,
+			reverse_proxy_combo,
 			dbl_click_policy_combo,
 			$el("br", {}, []),
 
